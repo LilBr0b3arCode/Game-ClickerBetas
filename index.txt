@@ -1,6 +1,6 @@
 <HTML>
      <head>
-          <title>Game Clicker</title>
+          <title>Game Clicker Beta</title>
 
 		<style>
 			.sectionLeft {
@@ -46,25 +46,34 @@
 					width: 64px;
 					width: 64px;
 				}
+
+				.unselectable {
+					-webkit-user-select: none;
+					-ms-user-select: none;
+					-moz-user-select: none;
+					user-select: none;
+				}
 		</style>
 	</head>
 
      <body>
+		<p>BETA V1.1</p>
 		<div class="sectionLeft">
 		  <center>
-			<div class="scoreContainer">
+			<div class="scoreContainer unselectable">
 	<span id="score">0</span> Plays<br>
 	<span id="scorepersecond">0</span> plays per second
 	</div>
 	<br>
-	<div class="clickerContainer">
+	<div class="clickerContainer unselectable">
 	<img src="images/game1.png" height="128px" width="256px" onclick="addToScore(clickingPower)">
 	</div>
+	<button onclick="saveGame();">Save</button>
 </center>
 </div>
 
 <div class="sectionRight">
-<table class="shopButton" onclick="buyGameBot()">
+<table class="shopButton unselectable" onclick="buyGameBot()">
 	<tr>
 		<td id ="image"><img src="images/game1.png"></td>
 		<td id="nameAndCost">
@@ -74,17 +83,39 @@
 	<td id="amount"><span id="gamebots">0</span></td>
 	</tr>
 	</table>
+	<table class="shopButton unselectable" onclick="buySkilledBot()">
+		<tr>
+			<td id ="image"><img src="images/game1.png"></td>
+			<td id="nameAndCost">
+			<p>Skilledbot</p>
+			<p><span id="skilledbotcost">100</span> plays</p>
+		</td>
+		<td id="amount"><span id="skilledbots">0</span></td>
+		</tr>
+		</table>
+		<table class="shopButton unselectable" onclick="buyHackerBot()">
+			<tr>
+				<td id ="image"><img src="images/game1.png"></td>
+				<td id="nameAndCost">
+				<p>Hackerbot</p>
+				<p><span id="hackerbotcost">1050</span> plays</p>
+			</td>
+			<td id="amount"><span id="hackerbots">0</span></td>
+			</tr>
+			</table>
 </div>
 
 
 	<script>
-	     var score = 0;
 
+var score = 0;
 var clickingPower = 1;
 var gamebotcost = 15;
 var gamebots = 0;
 var skilledbotcost = 100;
 var skilledbots = 0;
+var hackerbots = 0;
+var hackerbotcost = 1050;
 
 function buyGameBot() {
 	if (score >= gamebotcost)  {
@@ -112,23 +143,71 @@ function buySkilledBot() {
 	}
 }
 
+function buyHackerBot() {
+	if (score >= hackerbotcost)  {
+	    score = score - hackerbotcost;
+	    hackerbots = hackerbots + 1;
+	    hackerbotcost = Math.round(hackerbotcost * 1.15);
+
+	    document.getElementById("score").innerHTML = score;
+	    document.getElementById("hackerbotcost").innerHTML = hackerbotcost;
+	    document.getElementById("hackerbots").innerHTML = hackerbots;
+		updateScorePerSecond();
+	}
+}
+
              function addToScore(amount) {
 	        document.getElementById("score").innerHTML = score;
 	      	score = score + amount;
 	     }
 
 		 function updateScorePerSecond() {
-			scorePerSecond = gamebots + skilledbots * 5;
+			scorePerSecond = gamebots + skilledbots * 5 + hackerbots * 12;
 			document.getElementById("scorepersecond").innerHTML = scorePerSecond;
+		 }
+
+		 function loadGame()   {
+			var savedGame = JSON.parse(localStorage.getItem("gameSave"));
+			if (typeof savedGame.score !== "undefined") score = savedGame.score;
+			if (typeof savedGame.clickingPower !== "undefined") score = savedGame.clickingPower;
+			if (typeof savedGame.gamebotcost !== "undefined") score = savedGame.gamebotcost;
+			if (typeof savedGame.gamebots !== "undefined") score = savedGame.gamebots;
+			if (typeof savedGame.skilledbotcost !== "undefined") score = savedGame.skilledbotcost;
+			if (typeof savedGame.skilledbots !== "undefined") score = savedGame.skilledbots;
+			if (typeof savedGame.hackerbotcost !== "undefined") score = savedGame.hackerbotcost;
+			if (typeof savedGame.hackerbots !== "undefined") score = savedGame.hackerbots;
+		 }
+
+		 function saveGame() {
+			var gameSave = {
+				score: score,
+				clickingPower: clickingPower,
+				gamebotcost: gamebotcost,
+				gamebots: gamebots,
+				skilledbotcost: skilledbotcost,
+				skilledbots: skilledbots,
+				hackerbots: hackerbots,
+				hackerbotcost: hackerbotcost
+			};
+			localStorage.setItem("gameSave", JSON.stringify(gameSave)); 
+		 }
+
+		 window.onload = function() {
+			loadGame();
 		 }
 
 setInterval(function()  {
 	score = score + gamebots;
 	score = score + skilledbots * 5;
+	score = score + hackerbots * 12;
 document.getElementById("score").innerHTML = score;
 
 document.title = score + " plays - Game Clicker";
 }, 1000); // 1000ms = 1 second
+
+setInterval(function()	{	
+	saveGame();
+}, 30000); // 30000ms = 30 seconds
 	 </script>
      </body>
 </HTML>
